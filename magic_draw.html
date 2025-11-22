@@ -16,6 +16,16 @@
             touch-action: none;
             overflow: hidden;
             height: 100vh;
+            height: 100dvh; /* 移动端动态视口高度 */
+        }
+
+        /* 隐藏滚动条但保持滚动功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
         /* 手绘风格方框 */
@@ -117,64 +127,64 @@
 <body class="flex flex-col h-screen w-screen overflow-hidden">
 
     <!-- 顶部导航 -->
-    <header class="w-full px-6 py-3 z-20 flex-none bg-[#fdfbf7] border-b-2 border-dashed border-slate-200">
+    <header class="w-full px-3 sm:px-6 py-2 sm:py-3 z-20 flex-none bg-[#fdfbf7] border-b-2 border-dashed border-slate-200">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3 transform -rotate-1">
-                <div class="text-3xl drop-shadow-sm">✏️</div>
+            <div class="flex items-center gap-2 sm:gap-3 transform -rotate-1">
+                <div class="text-2xl sm:text-3xl drop-shadow-sm">✏️</div>
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-800 tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
+                    <h1 class="text-lg sm:text-2xl font-bold text-slate-800 tracking-wide sm:tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
                 </div>
             </div>
-            <div class="text-xs font-bold bg-yellow-200 text-yellow-800 px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <div class="text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                 网页版演示
             </div>
         </div>
     </header>
 
     <!-- 主内容区 -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
+    <main class="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6 overflow-hidden">
 
         <!-- 左侧栏: 控制区 -->
-        <aside class="flex-none w-full lg:w-80 flex flex-col gap-4 overflow-y-auto pb-4 no-scrollbar">
-            
+        <aside class="flex-none w-full lg:w-80 flex flex-col gap-2 sm:gap-3 lg:gap-4 overflow-y-auto pb-2 sm:pb-4 no-scrollbar">
+
             <!-- 单词选择器 -->
-            <div id="word-selector" class="grid grid-cols-3 lg:grid-cols-1 gap-3 transition-opacity duration-300">
-                <button onclick="setWord('apple', true)" id="btn-apple" class="sketchy-btn py-3 px-4 bg-red-100 text-red-800 font-bold text-lg justify-start gap-3 active transform hover:-rotate-1 transition-all">
-                    <span class="text-2xl">🍎</span> Apple
+            <div id="word-selector" class="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 transition-opacity duration-300">
+                <button onclick="setWord('apple', true)" id="btn-apple" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-red-100 text-red-800 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 active transform hover:-rotate-1 transition-all">
+                    <span class="text-xl sm:text-2xl">🍎</span> <span class="hidden sm:inline">Apple</span><span class="sm:hidden">🍎</span>
                 </button>
-                <button onclick="setWord('tiger', true)" id="btn-tiger" class="sketchy-btn py-3 px-4 bg-orange-100 text-orange-800 font-bold text-lg justify-start gap-3 transform hover:rotate-1 transition-all">
-                     <span class="text-2xl">🐯</span> Tiger
+                <button onclick="setWord('tiger', true)" id="btn-tiger" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-orange-100 text-orange-800 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 transform hover:rotate-1 transition-all">
+                     <span class="text-xl sm:text-2xl">🐯</span> <span class="hidden sm:inline">Tiger</span><span class="sm:hidden">🐯</span>
                 </button>
-                <button onclick="setWord('ocean', true)" id="btn-ocean" class="sketchy-btn py-3 px-4 bg-blue-100 text-blue-800 font-bold text-lg justify-start gap-3 transform hover:-rotate-1 transition-all">
-                     <span class="text-2xl">🌊</span> Ocean
+                <button onclick="setWord('ocean', true)" id="btn-ocean" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-blue-100 text-blue-800 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 transform hover:-rotate-1 transition-all">
+                     <span class="text-xl sm:text-2xl">🌊</span> <span class="hidden sm:inline">Ocean</span><span class="sm:hidden">🌊</span>
                 </button>
             </div>
 
             <!-- 信息与工具卡片 -->
-            <div class="sketchy-box p-5 relative bg-white rotate-[0.5deg] flex-none">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 paper-tape z-20"></div>
-                
+            <div class="sketchy-box p-3 sm:p-5 relative bg-white rotate-[0.5deg] flex-none">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 sm:w-24 h-4 sm:h-6 paper-tape z-20"></div>
+
                 <div class="flex flex-col gap-1">
                     <div class="flex justify-between items-start">
-                        <h2 id="display-word" class="text-4xl font-bold text-slate-800 tracking-wide" style="text-shadow: 2px 2px 0px #eee;">Apple</h2>
-                        <button onclick="speakCurrentWord()" class="sketchy-btn w-10 h-10 rounded-full bg-violet-50 text-violet-600 shadow-sm transform hover:scale-105" title="朗读">🔊</button>
+                        <h2 id="display-word" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 tracking-wide" style="text-shadow: 2px 2px 0px #eee;">Apple</h2>
+                        <button onclick="speakCurrentWord()" class="sketchy-btn w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-violet-50 text-violet-600 shadow-sm transform hover:scale-105 text-sm sm:text-base" title="朗读">🔊</button>
                     </div>
-                    <p id="display-meaning" class="text-xl text-slate-500 font-bold font-noto">苹果 (píng guǒ)</p>
+                    <p id="display-meaning" class="text-base sm:text-lg lg:text-xl text-slate-500 font-bold font-noto">苹果 (píng guǒ)</p>
                 </div>
 
                 <!-- 工具栏 (生成后隐藏) -->
-                <div id="tools-panel" class="mt-6 border-t-2 border-dashed border-slate-200 pt-4 transition-all duration-300">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">画笔工具</p>
+                <div id="tools-panel" class="mt-4 sm:mt-6 border-t-2 border-dashed border-slate-200 pt-3 sm:pt-4 transition-all duration-300">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 sm:mb-3">画笔工具</p>
                     <div class="flex justify-between gap-2 flex-wrap">
-                        <button onclick="setColor('#2d2d2d')" class="tool-btn active w-10 h-10 rounded-full bg-[#2d2d2d]" aria-label="黑色"></button>
-                        <button onclick="setColor('#ef4444')" class="tool-btn w-10 h-10 rounded-full bg-[#ef4444]" aria-label="红色"></button>
-                        <button onclick="setColor('#f97316')" class="tool-btn w-10 h-10 rounded-full bg-[#f97316]" aria-label="橙色"></button>
-                        <button onclick="setColor('#3b82f6')" class="tool-btn w-10 h-10 rounded-full bg-[#3b82f6]" aria-label="蓝色"></button>
-                        <button onclick="setColor('#10b981')" class="tool-btn w-10 h-10 rounded-full bg-[#10b981]" aria-label="绿色"></button>
-                        <button onclick="setEraser()" id="btn-eraser" class="tool-btn w-10 h-10 rounded-full bg-slate-100 text-xl border-slate-300" title="橡皮擦">🧽</button>
+                        <button onclick="setColor('#2d2d2d')" class="tool-btn active w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2d2d2d]" aria-label="黑色"></button>
+                        <button onclick="setColor('#ef4444')" class="tool-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#ef4444]" aria-label="红色"></button>
+                        <button onclick="setColor('#f97316')" class="tool-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f97316]" aria-label="橙色"></button>
+                        <button onclick="setColor('#3b82f6')" class="tool-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#3b82f6]" aria-label="蓝色"></button>
+                        <button onclick="setColor('#10b981')" class="tool-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#10b981]" aria-label="绿色"></button>
+                        <button onclick="setEraser()" id="btn-eraser" class="tool-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 text-lg sm:text-xl border-slate-300" title="橡皮擦">🧽</button>
                     </div>
-                    <div class="mt-4 flex justify-end">
-                         <button onclick="clearCanvas()" class="text-sm font-bold text-slate-400 hover:text-red-500 px-2 underline decoration-wavy decoration-slate-300 hover:decoration-red-300">
+                    <div class="mt-3 sm:mt-4 flex justify-end">
+                         <button onclick="clearCanvas()" class="text-xs sm:text-sm font-bold text-slate-400 hover:text-red-500 px-2 underline decoration-wavy decoration-slate-300 hover:decoration-red-300">
                             🗑️ 清空画布
                         </button>
                     </div>
@@ -189,18 +199,18 @@
             <!-- 底部操作按钮 -->
             <div class="mt-auto pt-2">
                 <!-- 状态1: 生成按钮 -->
-                <button id="btn-generate-magic" onclick="generateMagic()" class="sketchy-btn w-full py-4 bg-gradient-to-r from-violet-400 to-fuchsia-400 text-white font-bold text-xl gap-2 transform hover:-translate-y-1 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all">
+                <button id="btn-generate-magic" onclick="generateMagic()" class="sketchy-btn w-full py-3 sm:py-4 bg-gradient-to-r from-violet-400 to-fuchsia-400 text-white font-bold text-lg sm:text-xl gap-2 transform hover:-translate-y-1 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all">
                     ✨ 施展魔法
                 </button>
-                
+
                 <!-- 状态2: 结果操作按钮 (默认隐藏) -->
-                <div id="result-buttons" class="hidden flex flex-col gap-3">
-                    <div class="flex gap-3">
-                        <button onclick="saveImage()" class="sketchy-btn flex-1 py-3 bg-violet-500 text-white font-bold hover:bg-violet-600 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
-                            💾 保存图片
+                <div id="result-buttons" class="hidden flex flex-col gap-2 sm:gap-3">
+                    <div class="flex gap-2 sm:gap-3">
+                        <button onclick="saveImage()" class="sketchy-btn flex-1 py-2 sm:py-3 bg-violet-500 text-white font-bold text-sm sm:text-base hover:bg-violet-600 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                            💾 保存
                         </button>
-                        <button onclick="resetApp()" class="sketchy-btn flex-1 py-3 bg-white text-slate-700 font-bold hover:bg-slate-50">
-                            🔄 再画一张
+                        <button onclick="resetApp()" class="sketchy-btn flex-1 py-2 sm:py-3 bg-white text-slate-700 font-bold text-sm sm:text-base hover:bg-slate-50">
+                            🔄 再画
                         </button>
                     </div>
                 </div>
@@ -209,22 +219,22 @@
         </aside>
 
         <!-- 右侧栏: 大画板 -->
-        <section class="flex-1 relative h-full min-h-[400px] sketchy-box bg-white overflow-hidden border-4 border-slate-700" id="canvas-container">
+        <section class="flex-1 relative h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] sketchy-box bg-white overflow-hidden border-2 sm:border-4 border-slate-700" id="canvas-container">
             
-            <div class="absolute top-4 left-4 text-sm text-slate-300 font-bold uppercase tracking-widest select-none z-20 bg-white/80 px-2 rounded" id="canvas-label">自由绘画区</div>
+            <div class="absolute top-2 sm:top-4 left-2 sm:left-4 text-[10px] sm:text-sm text-slate-300 font-bold uppercase tracking-wider sm:tracking-widest select-none z-20 bg-white/80 px-1 sm:px-2 rounded" id="canvas-label">自由绘画区</div>
 
             <!-- 1. 背景层 -->
             <div id="canvas-bg" class="absolute inset-0 pointer-events-none flex flex-col justify-center h-full w-full opacity-40">
                 <div class="h-1/2 w-full flex flex-col justify-center relative">
-                     <div class="absolute w-full top-[10%] border-t-2 border-slate-300"></div>
-                     <div class="absolute w-full top-[50%] border-t-2 border-dashed border-slate-300"></div>
-                     <div class="absolute w-full top-[90%] border-t-2 border-red-200" style="border-color: #fca5a5;"></div>
+                     <div class="absolute w-full top-[10%] border-t border-t-2 sm:border-t-2 border-slate-300"></div>
+                     <div class="absolute w-full top-[50%] border-t border-t-2 sm:border-t-2 border-dashed border-slate-300"></div>
+                     <div class="absolute w-full top-[90%] border-t border-t-2 sm:border-t-2 border-red-200" style="border-color: #fca5a5;"></div>
                 </div>
             </div>
 
             <!-- 2. 临摹文字 -->
             <div id="trace-layer" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                 <span id="trace-letters" class="font-[Schoolbell] text-[15vw] lg:text-[200px] text-slate-100 select-none tracking-wider mt-[-2%]">apple</span>
+                 <span id="trace-letters" class="font-[Schoolbell] text-[12vw] sm:text-[15vw] lg:text-[180px] xl:text-[200px] text-slate-100 select-none tracking-wider mt-[-2%]">apple</span>
             </div>
 
             <!-- 3. 画布 (绘画用) -->
@@ -235,17 +245,17 @@
 
             <!-- 5. 加载遮罩 -->
             <div id="loading-overlay" class="hidden absolute inset-0 z-30 bg-white/90 flex flex-col items-center justify-center backdrop-blur-sm">
-                <div class="magic-loader mb-6"></div>
-                <p class="text-violet-600 font-bold text-xl animate-pulse">AI 小画家正在施法...</p>
-                <p class="text-slate-400 text-sm mt-2">请稍等片刻</p>
+                <div class="magic-loader mb-4 sm:mb-6"></div>
+                <p class="text-violet-600 font-bold text-base sm:text-xl animate-pulse">AI 小画家正在施法...</p>
+                <p class="text-slate-400 text-xs sm:text-sm mt-2">请稍等片刻</p>
             </div>
 
             <!-- 6. 夸奖弹窗 -->
-            <div id="praise-modal" class="hidden absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
-                <div class="praise-modal bg-white border-4 border-yellow-400 rounded-3xl p-8 shadow-[8px_8px_0px_rgba(0,0,0,0.2)] transform rotate-2 text-center">
-                    <div class="text-6xl mb-4">🌟</div>
-                    <h2 class="text-3xl font-bold text-violet-600 mb-2">小朋友你真棒！</h2>
-                    <p class="text-slate-500 font-bold">画得太好看了！</p>
+            <div id="praise-modal" class="hidden absolute inset-0 z-40 flex items-center justify-center pointer-events-none p-4">
+                <div class="praise-modal bg-white border-2 sm:border-4 border-yellow-400 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-[6px_6px_0px_rgba(0,0,0,0.2)] sm:shadow-[8px_8px_0px_rgba(0,0,0,0.2)] transform rotate-2 text-center max-w-sm">
+                    <div class="text-4xl sm:text-6xl mb-3 sm:mb-4">🌟</div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-violet-600 mb-2">小朋友你真棒！</h2>
+                    <p class="text-sm sm:text-base text-slate-500 font-bold">画得太好看了！</p>
                 </div>
             </div>
 
@@ -480,32 +490,46 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("连接失败");
+                if (!response.ok) {
+                    // 根据状态码提供更详细的错误信息
+                    const errorData = await response.json().catch(() => ({}));
+                    let errorMessage = "连接失败";
+
+                    if (response.status === 429) {
+                        errorMessage = "AI 使用次数已达上限\n请稍后再试或联系管理员";
+                    } else if (response.status === 500) {
+                        errorMessage = "服务器错误\n" + (errorData.error || "请检查配置");
+                    } else if (response.status === 400) {
+                        errorMessage = "请求参数错误";
+                    }
+
+                    throw new Error(errorMessage);
+                }
 
                 const result = await response.json();
                 const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-                
+
                 if (imagePart) {
                      const finalImageBase64 = imagePart.inlineData.data;
                      magicImg.src = `data:image/png;base64,${finalImageBase64}`;
-                     
+
                      magicImg.onload = () => {
                         // --- 成功流程 ---
                         appMode = 'result';
-                        
+
                         // 1. 隐藏 Loading
                         loadingOverlay.classList.add('hidden');
-                        
+
                         // 2. 显示结果覆盖层
                         magicImg.classList.remove('hidden');
                         canvas.classList.add('hidden');
                         document.getElementById('trace-layer').classList.add('hidden');
                         document.getElementById('canvas-bg').classList.add('hidden');
-                        
+
                         // 3. 弹出夸奖 + 语音
                         praiseModal.classList.remove('hidden');
                         speakText("小朋友你真棒！画得太好了！");
-                        
+
                         // 4. 切换左侧按钮
                         btn.classList.add('hidden');
                         document.getElementById('result-buttons').classList.remove('hidden');
@@ -518,11 +542,11 @@
                         }, 3000);
                      };
                 } else {
-                    throw new Error('生成失败');
+                    throw new Error('生成失败：未收到图片数据');
                 }
             } catch (error) {
-                console.error(error);
-                alert("哎呀，魔法暂时失灵了，请检查网络或重试！");
+                console.error('生成失败:', error);
+                alert("哎呀，魔法暂时失灵了！\n\n" + error.message + "\n\n请稍后重试或联系管理员。");
                 loadingOverlay.classList.add('hidden');
                 btn.disabled = false;
                 btn.innerHTML = `✨ 施展魔法`;
