@@ -1,0 +1,19 @@
+# Netlify 配置文件
+
+[build]
+  # 指定发布目录（当前目录下的所有文件）
+  publish = "."
+  # Netlify Functions 目录
+  functions = "netlify/functions"
+
+# 设置主页为 magic_draw.html
+[[redirects]]
+  from = "/"
+  to = "/magic_draw.html"
+  status = 200
+
+# 404 页面重定向到主页
+[[redirects]]
+  from = "/*"
+  to = "/magic_draw.html"
+  status = 404

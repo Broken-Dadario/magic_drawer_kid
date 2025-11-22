@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magic Words - 魔法单词本</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Noto+Sans+SC:wght@400;700&family=Schoolbell&display=swap" rel="stylesheet">
+    <style>
+        /* 纸张纹理背景 */
+        body {
+            font-family: 'Schoolbell', 'Noto Sans SC', cursive;
+            background-color: #fdfbf7;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: #4a4a4a;
+            touch-action: none;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* 手绘风格方框 */
+        .sketchy-box {
+            background: white;
+            border: 3px solid #4a4a4a;
+            border-radius: 2px 255px 3px 25px / 255px 5px 225px 3px;
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+
+        /* 手绘风格按钮 */
+        .sketchy-btn {
+            border: 2px solid #4a4a4a;
+            background-color: white;
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            box-shadow: 3px 3px 0px 0px rgba(0,0,0,0.8);
+            transition: transform 0.1s, box-shadow 0.1s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .sketchy-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px 0px rgba(0,0,0,0.8);
+        }
+        .sketchy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.1);
+            background-color: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        /* 工具按钮样式 */
+        .tool-btn {
+            transition: transform 0.2s;
+            border: 2px solid #4a4a4a;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tool-btn.active {
+            transform: scale(1.2) rotate(-5deg);
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        /* 胶带效果 */
+        .paper-tape {
+            background-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* 自定义光标 */
+        #drawing-board {
+            cursor: crosshair;
+            touch-action: none;
+        }
+        .cursor-pencil {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23000000" d="M7.127 22.562l-7.127 1.438 1.438-7.128 5.689 5.69zm1.414-1.414l11.228-11.225-5.69-5.692-11.227 11.227 5.689 5.69zm9.768-21.148l-2.816 2.817 5.691 5.691 2.816-2.819-5.691-5.689z"/></svg>') 0 24, crosshair !important;
+        }
+        .cursor-eraser {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"/><path d="M17 17L7 7"/></svg>') 0 24, cell !important;
+        }
+
+        /* 加载动画 */
+        .magic-loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #DDD;
+            border-bottom-color: #8B5CF6;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            filter: url(#rough-paper); 
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 夸奖弹窗动画 */
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        .praise-modal {
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden">
+
+    <!-- 顶部导航 -->
+    <header class="w-full px-6 py-3 z-20 flex-none bg-[#fdfbf7] border-b-2 border-dashed border-slate-200">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 transform -rotate-1">
+                <div class="text-3xl drop-shadow-sm">✏️</div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800 tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
+                </div>
+            </div>
+            <div class="text-xs font-bold bg-yellow-200 text-yellow-800 px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                网页版演示
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 lg:p-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
+
+        <!-- 左侧栏: 控制区 -->
+        <aside class="flex-none w-full lg:w-80 flex flex-col gap-4 overflow-y-auto pb-4 no-scrollbar">
+            
+            <!-- 单词选择器 -->
+            <div id="word-selector" class="grid grid-cols-3 lg:grid-cols-1 gap-3 transition-opacity duration-300">
+                <button onclick="setWord('apple', true)" id="btn-apple" class="sketchy-btn py-3 px-4 bg-red-100 text-red-800 font-bold text-lg justify-start gap-3 active transform hover:-rotate-1 transition-all">
+                    <span class="text-2xl">🍎</span> Apple
+                </button>
+                <button onclick="setWord('tiger', true)" id="btn-tiger" class="sketchy-btn py-3 px-4 bg-orange-100 text-orange-800 font-bold text-lg justify-start gap-3 transform hover:rotate-1 transition-all">
+                     <span class="text-2xl">🐯</span> Tiger
+                </button>
+                <button onclick="setWord('ocean', true)" id="btn-ocean" class="sketchy-btn py-3 px-4 bg-blue-100 text-blue-800 font-bold text-lg justify-start gap-3 transform hover:-rotate-1 transition-all">
+                     <span class="text-2xl">🌊</span> Ocean
+                </button>
+            </div>
+
+            <!-- 信息与工具卡片 -->
+            <div class="sketchy-box p-5 relative bg-white rotate-[0.5deg] flex-none">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 paper-tape z-20"></div>
+                
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between items-start">
+                        <h2 id="display-word" class="text-4xl font-bold text-slate-800 tracking-wide" style="text-shadow: 2px 2px 0px #eee;">Apple</h2>
+                        <button onclick="speakCurrentWord()" class="sketchy-btn w-10 h-10 rounded-full bg-violet-50 text-violet-600 shadow-sm transform hover:scale-105" title="朗读">🔊</button>
+                    </div>
+                    <p id="display-meaning" class="text-xl text-slate-500 font-bold font-noto">苹果 (píng guǒ)</p>
+                </div>
+
+                <!-- 工具栏 (生成后隐藏) -->
+                <div id="tools-panel" class="mt-6 border-t-2 border-dashed border-slate-200 pt-4 transition-all duration-300">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">画笔工具</p>
+                    <div class="flex justify-between gap-2 flex-wrap">
+                        <button onclick="setColor('#2d2d2d')" class="tool-btn active w-10 h-10 rounded-full bg-[#2d2d2d]" aria-label="黑色"></button>
+                        <button onclick="setColor('#ef4444')" class="tool-btn w-10 h-10 rounded-full bg-[#ef4444]" aria-label="红色"></button>
+                        <button onclick="setColor('#f97316')" class="tool-btn w-10 h-10 rounded-full bg-[#f97316]" aria-label="橙色"></button>
+                        <button onclick="setColor('#3b82f6')" class="tool-btn w-10 h-10 rounded-full bg-[#3b82f6]" aria-label="蓝色"></button>
+                        <button onclick="setColor('#10b981')" class="tool-btn w-10 h-10 rounded-full bg-[#10b981]" aria-label="绿色"></button>
+                        <button onclick="setEraser()" id="btn-eraser" class="tool-btn w-10 h-10 rounded-full bg-slate-100 text-xl border-slate-300" title="橡皮擦">🧽</button>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                         <button onclick="clearCanvas()" class="text-sm font-bold text-slate-400 hover:text-red-500 px-2 underline decoration-wavy decoration-slate-300 hover:decoration-red-300">
+                            🗑️ 清空画布
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 成功后显示的赞美语 -->
+                <div id="praise-text" class="hidden mt-6 text-center">
+                    <p class="text-2xl font-bold text-violet-600 animate-pulse">✨ 太棒了！ ✨</p>
+                </div>
+            </div>
+
+            <!-- 底部操作按钮 -->
+            <div class="mt-auto pt-2">
+                <!-- 状态1: 生成按钮 -->
+                <button id="btn-generate-magic" onclick="generateMagic()" class="sketchy-btn w-full py-4 bg-gradient-to-r from-violet-400 to-fuchsia-400 text-white font-bold text-xl gap-2 transform hover:-translate-y-1 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all">
+                    ✨ 施展魔法
+                </button>
+                
+                <!-- 状态2: 结果操作按钮 (默认隐藏) -->
+                <div id="result-buttons" class="hidden flex flex-col gap-3">
+                    <div class="flex gap-3">
+                        <button onclick="saveImage()" class="sketchy-btn flex-1 py-3 bg-violet-500 text-white font-bold hover:bg-violet-600 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                            💾 保存图片
+                        </button>
+                        <button onclick="resetApp()" class="sketchy-btn flex-1 py-3 bg-white text-slate-700 font-bold hover:bg-slate-50">
+                            🔄 再画一张
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- 右侧栏: 大画板 -->
+        <section class="flex-1 relative h-full min-h-[400px] sketchy-box bg-white overflow-hidden border-4 border-slate-700" id="canvas-container">
+            
+            <div class="absolute top-4 left-4 text-sm text-slate-300 font-bold uppercase tracking-widest select-none z-20 bg-white/80 px-2 rounded" id="canvas-label">自由绘画区</div>
+
+            <!-- 1. 背景层 -->
+            <div id="canvas-bg" class="absolute inset-0 pointer-events-none flex flex-col justify-center h-full w-full opacity-40">
+                <div class="h-1/2 w-full flex flex-col justify-center relative">
+                     <div class="absolute w-full top-[10%] border-t-2 border-slate-300"></div>
+                     <div class="absolute w-full top-[50%] border-t-2 border-dashed border-slate-300"></div>
+                     <div class="absolute w-full top-[90%] border-t-2 border-red-200" style="border-color: #fca5a5;"></div>
+                </div>
+            </div>
+
+            <!-- 2. 临摹文字 -->
+            <div id="trace-layer" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                 <span id="trace-letters" class="font-[Schoolbell] text-[15vw] lg:text-[200px] text-slate-100 select-none tracking-wider mt-[-2%]">apple</span>
+            </div>
+
+            <!-- 3. 画布 (绘画用) -->
+            <canvas id="drawing-board" class="relative z-10 block w-full h-full touch-none cursor-pencil"></canvas>
+            
+            <!-- 4. 结果展示层 (生成图片用，直接覆盖在画布上) -->
+            <img id="magic-result" class="hidden absolute inset-0 w-full h-full object-cover z-20" alt="魔法画作">
+
+            <!-- 5. 加载遮罩 -->
+            <div id="loading-overlay" class="hidden absolute inset-0 z-30 bg-white/90 flex flex-col items-center justify-center backdrop-blur-sm">
+                <div class="magic-loader mb-6"></div>
+                <p class="text-violet-600 font-bold text-xl animate-pulse">AI 小画家正在施法...</p>
+                <p class="text-slate-400 text-sm mt-2">请稍等片刻</p>
+            </div>
+
+            <!-- 6. 夸奖弹窗 -->
+            <div id="praise-modal" class="hidden absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
+                <div class="praise-modal bg-white border-4 border-yellow-400 rounded-3xl p-8 shadow-[8px_8px_0px_rgba(0,0,0,0.2)] transform rotate-2 text-center">
+                    <div class="text-6xl mb-4">🌟</div>
+                    <h2 class="text-3xl font-bold text-violet-600 mb-2">小朋友你真棒！</h2>
+                    <p class="text-slate-500 font-bold">画得太好看了！</p>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        // --- 配置数据 ---
+        const words = {
+            apple: { text: "Apple", meaning: "苹果 (Píngguǒ)", speak: "Apple, 苹果", color: "#ef4444", textCol: "text-red-800" },
+            tiger: { text: "Tiger", meaning: "老虎 (Lǎohǔ)", speak: "Tiger, 老虎", color: "#f97316", textCol: "text-orange-800" },
+            ocean: { text: "Ocean", meaning: "海洋 (Hǎiyáng)", speak: "Ocean, 海洋", color: "#3b82f6", textCol: "text-blue-800" }
+        };
+        
+        let currentWordKey = "apple";
+        let isDrawing = false;
+        let brushColor = "#2d2d2d";
+        let brushSize = 8; 
+        let isEraser = false;
+        let appMode = 'drawing'; // 'drawing' or 'result'
+
+        // --- DOM 元素 ---
+        const canvas = document.getElementById('drawing-board');
+        const ctx = canvas.getContext('2d');
+        const magicImg = document.getElementById('magic-result');
+        
+        // --- 初始化 ---
+        function init() {
+            resizeCanvas();
+            setWord('apple', false); 
+
+            window.addEventListener('resize', () => {
+                clearTimeout(window.resizeTimer);
+                window.resizeTimer = setTimeout(resizeCanvas, 100);
+            });
+
+            setupCanvasEvents();
+        }
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            // 仅在绘画模式下调整大小和保留内容
+            if (appMode === 'drawing') {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.drawImage(canvas, 0, 0);
+
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.drawImage(tempCanvas, 0, 0);
+                updateContextStyles();
+            } else {
+                // 结果模式下只需调整canvas尺寸以防万一，内容由img标签负责自适应
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+            }
+        }
+
+        function updateContextStyles() {
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            if (isEraser) {
+                ctx.lineWidth = brushSize * 4; 
+                ctx.globalCompositeOperation = 'destination-out';
+                canvas.classList.remove('cursor-pencil');
+                canvas.classList.add('cursor-eraser');
+            } else {
+                ctx.lineWidth = brushSize;
+                ctx.strokeStyle = brushColor;
+                ctx.globalCompositeOperation = 'source-over';
+                canvas.classList.add('cursor-pencil');
+                canvas.classList.remove('cursor-eraser');
+            }
+        }
+
+        function setWord(key, shouldSpeak = true) {
+            // 如果当前有结果，先重置
+            if (appMode === 'result') {
+                resetApp();
+            }
+
+            currentWordKey = key;
+            const data = words[key];
+            
+            document.getElementById('display-word').innerText = data.text;
+            document.getElementById('display-word').className = `text-4xl font-bold tracking-wide ${data.textCol}`;
+            document.getElementById('display-meaning').innerText = data.meaning;
+            document.getElementById('trace-letters').innerText = data.text.toLowerCase();
+
+            ['apple', 'tiger', 'ocean'].forEach(k => {
+                 const btn = document.getElementById(`btn-${k}`);
+                 btn.style.transform = ""; 
+                 btn.classList.remove('ring-2', 'ring-slate-400');
+            });
+            
+            const activeBtn = document.getElementById(`btn-${key}`);
+            activeBtn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400');
+            activeBtn.style.transform = "scale(1.05) translateX(5px)";
+
+            clearCanvas();
+
+            if (shouldSpeak) {
+                speakText(data.speak);
+            }
+        }
+
+        function speakCurrentWord() {
+            speakText(words[currentWordKey].speak);
+        }
+
+        function speakText(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN'; 
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- 绘画逻辑 ---
+        function setupCanvasEvents() {
+            const start = (e) => {
+                if (appMode !== 'drawing') return;
+                isDrawing = true;
+                const pos = getPos(e);
+                updateContextStyles();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                if (!isEraser) ctx.lineWidth = brushSize * (0.8 + Math.random() * 0.4);
+            };
+
+            const move = (e) => {
+                if (!isDrawing) return;
+                const pos = getPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                if (!isEraser) ctx.lineWidth = brushSize * (0.8 + Math.random() * 0.4);
+            };
+
+            const end = () => { isDrawing = false; if (isDrawing) ctx.closePath(); };
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', end);
+            canvas.addEventListener('mouseout', end);
+
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e.touches[0]); }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e.touches[0]); }, { passive: false });
+            canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        function setColor(color) {
+            if (appMode !== 'drawing') return;
+            isEraser = false;
+            brushColor = color;
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.id === 'btn-eraser') btn.classList.remove('bg-slate-200', 'ring-2', 'ring-slate-400');
+            });
+            const btns = document.querySelectorAll('.tool-btn');
+            btns.forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes(color)) b.classList.add('active'); });
+            updateContextStyles();
+        }
+
+        function setEraser() {
+            if (appMode !== 'drawing') return;
+            isEraser = true;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            const eraserBtn = document.getElementById('btn-eraser');
+            eraserBtn.classList.add('active', 'bg-slate-200');
+            updateContextStyles();
+        }
+
+        function clearCanvas() {
+            if (appMode !== 'drawing') return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // --- 魔法生成 ---
+        async function generateMagic() {
+            const btn = document.getElementById('btn-generate-magic');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const praiseModal = document.getElementById('praise-modal');
+            const wordSelector = document.getElementById('word-selector');
+            
+            // 1. 锁定界面
+            btn.disabled = true;
+            btn.innerHTML = `🔮 正在施法中...`;
+            loadingOverlay.classList.remove('hidden');
+            wordSelector.classList.add('pointer-events-none', 'opacity-50'); // 禁止切换单词
+            
+            // 2. 准备画布数据
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tCtx = tempCanvas.getContext('2d');
+            tCtx.fillStyle = "#ffffff";
+            tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            tCtx.drawImage(canvas, 0, 0);
+            const base64Image = tempCanvas.toDataURL("image/png").split(',')[1];
+
+            try {
+                const wordText = words[currentWordKey].text;
+                const prompt = `Act as a professional illustrator collaborating with a child.
+                Task: Create a beautiful colored pencil illustration based on this child's drawing of a "${wordText}".
+
+                CRITICAL RULES:
+                1. KEEP THE CHILD'S ORIGINAL LINES EXACTLY AS THEY ARE. Do not reshape, hide, or "fix" the original strokes.
+                2. Apply colors GENTLY inside the shapes defined by the child's lines.
+                3. Build a magical, artistic background and atmosphere AROUND the drawing to make the composition look professional and harmonious.
+                4. The final image MUST clearly depict the meaning of the word ("${wordText}") as the main subject.
+
+                Style: Soft, warm colored pencils on paper. Naive charm mixed with professional artistic context.`;
+
+                // 调用Netlify Function而不是直接调用Google API
+                const response = await fetch('/.netlify/functions/generate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        imageData: base64Image
+                    })
+                });
+
+                if (!response.ok) throw new Error("连接失败");
+
+                const result = await response.json();
+                const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                
+                if (imagePart) {
+                     const finalImageBase64 = imagePart.inlineData.data;
+                     magicImg.src = `data:image/png;base64,${finalImageBase64}`;
+                     
+                     magicImg.onload = () => {
+                        // --- 成功流程 ---
+                        appMode = 'result';
+                        
+                        // 1. 隐藏 Loading
+                        loadingOverlay.classList.add('hidden');
+                        
+                        // 2. 显示结果覆盖层
+                        magicImg.classList.remove('hidden');
+                        canvas.classList.add('hidden');
+                        document.getElementById('trace-layer').classList.add('hidden');
+                        document.getElementById('canvas-bg').classList.add('hidden');
+                        
+                        // 3. 弹出夸奖 + 语音
+                        praiseModal.classList.remove('hidden');
+                        speakText("小朋友你真棒！画得太好了！");
+                        
+                        // 4. 切换左侧按钮
+                        btn.classList.add('hidden');
+                        document.getElementById('result-buttons').classList.remove('hidden');
+                        document.getElementById('tools-panel').classList.add('opacity-20', 'pointer-events-none'); // 禁用工具栏
+                        document.getElementById('praise-text').classList.remove('hidden');
+
+                        // 5. 几秒后隐藏夸奖弹窗(不隐藏结果)
+                        setTimeout(() => {
+                            praiseModal.classList.add('hidden');
+                        }, 3000);
+                     };
+                } else {
+                    throw new Error('生成失败');
+                }
+            } catch (error) {
+                console.error(error);
+                alert("哎呀，魔法暂时失灵了，请检查网络或重试！");
+                loadingOverlay.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerHTML = `✨ 施展魔法`;
+                wordSelector.classList.remove('pointer-events-none', 'opacity-50');
+            }
+        }
+
+        function resetApp() {
+            appMode = 'drawing';
+            
+            // 恢复画布显示
+            magicImg.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            document.getElementById('trace-layer').classList.remove('hidden');
+            document.getElementById('canvas-bg').classList.remove('hidden');
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 恢复按钮状态
+            const btn = document.getElementById('btn-generate-magic');
+            btn.disabled = false;
+            btn.innerHTML = `✨ 施展魔法`;
+            btn.classList.remove('hidden');
+            
+            document.getElementById('result-buttons').classList.add('hidden');
+            document.getElementById('word-selector').classList.remove('pointer-events-none', 'opacity-50');
+            document.getElementById('tools-panel').classList.remove('opacity-20', 'pointer-events-none');
+            document.getElementById('praise-text').classList.add('hidden');
+            
+            // 隐藏夸奖弹窗（以防万一还在）
+            document.getElementById('praise-modal').classList.add('hidden');
+        }
+
+        function saveImage() {
+            if (!magicImg.src) return;
+            const link = document.createElement('a');
+            link.download = `magic-${currentWordKey}.png`;
+            link.href = magicImg.src;
+            link.click();
+        }
+
+        // 启动
+        init();
+
+    </script>
+</body>
+</html>
