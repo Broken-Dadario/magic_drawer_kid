@@ -99,6 +99,38 @@
             cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16C2 15 2 13 3 12L13 2L22 11L20 20Z"/><path d="M17 17L7 7"/></svg>') 0 24, cell !important;
         }
 
+        /* 画布安全区提示 */
+        .safe-zone-hint {
+            position: absolute;
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        .safe-zone-hint.left { left: 0; top: 0; bottom: 0; width: 40px; }
+        .safe-zone-hint.right { right: 0; top: 0; bottom: 0; width: 40px; background: linear-gradient(-90deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%); }
+        .safe-zone-hint.top { left: 0; right: 0; top: 0; height: 40px; background: linear-gradient(180deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%); }
+        .safe-zone-hint.bottom { left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(0deg, rgba(139, 92, 246, 0.1) 0%, transparent 100%); }
+
+        /* 移动端显示滚动提示 */
+        @media (max-width: 1023px) {
+            .safe-zone-hint::before {
+                content: '👆';
+                position: absolute;
+                font-size: 12px;
+                opacity: 0.5;
+                animation: fadeInOut 2s infinite;
+            }
+            .safe-zone-hint.left::before { left: 10px; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+            .safe-zone-hint.right::before { right: 10px; top: 50%; transform: translateY(-50%) rotate(90deg); }
+            .safe-zone-hint.top::before { left: 50%; top: 10px; transform: translateX(-50%); }
+            .safe-zone-hint.bottom::before { left: 50%; bottom: 10px; transform: translateX(-50%) rotate(180deg); }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
         /* 加载动画 */
         .magic-loader {
             width: 48px;
@@ -142,7 +174,7 @@
     </header>
 
     <!-- 主内容区 -->
-    <main class="flex-1 w-full max-w-7xl mx-auto p-2 sm:p-4 lg:p-6 flex flex-col lg:flex-row gap-3 sm:gap-4 lg:gap-6 overflow-hidden">
+    <main class="flex-1 w-full max-w-7xl mx-auto p-3 sm:p-5 lg:p-6 flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6 overflow-hidden">
 
         <!-- 左侧栏: 控制区 -->
         <aside class="flex-none w-full lg:w-80 flex flex-col gap-2 sm:gap-3 lg:gap-4 overflow-y-auto pb-2 sm:pb-4 no-scrollbar">
@@ -220,8 +252,14 @@
 
         <!-- 右侧栏: 大画板 -->
         <section class="flex-1 relative h-full min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] sketchy-box bg-white overflow-hidden border-2 sm:border-4 border-slate-700" id="canvas-container">
-            
+
             <div class="absolute top-2 sm:top-4 left-2 sm:left-4 text-[10px] sm:text-sm text-slate-300 font-bold uppercase tracking-wider sm:tracking-widest select-none z-20 bg-white/80 px-1 sm:px-2 rounded" id="canvas-label">自由绘画区</div>
+
+            <!-- 安全区提示（移动端/平板显示） -->
+            <div class="safe-zone-hint left lg:hidden"></div>
+            <div class="safe-zone-hint right lg:hidden"></div>
+            <div class="safe-zone-hint top lg:hidden"></div>
+            <div class="safe-zone-hint bottom lg:hidden"></div>
 
             <!-- 1. 背景层 -->
             <div id="canvas-bg" class="absolute inset-0 pointer-events-none flex flex-col justify-center h-full w-full opacity-40">
@@ -379,11 +417,29 @@
         }
 
         // --- 绘画逻辑 ---
+        // 检测是否在安全区（边缘滚动区域）
+        function isInSafeZone(pos) {
+            const safeMargin = 40; // 安全区宽度（像素）
+            const rect = canvas.getBoundingClientRect();
+
+            // 桌面端不启用安全区
+            if (window.innerWidth >= 1024) return false;
+
+            return pos.x < safeMargin ||
+                   pos.x > rect.width - safeMargin ||
+                   pos.y < safeMargin ||
+                   pos.y > rect.height - safeMargin;
+        }
+
         function setupCanvasEvents() {
             const start = (e) => {
                 if (appMode !== 'drawing') return;
-                isDrawing = true;
                 const pos = getPos(e);
+
+                // 如果在安全区，不开始绘画
+                if (isInSafeZone(pos)) return;
+
+                isDrawing = true;
                 updateContextStyles();
                 ctx.beginPath();
                 ctx.moveTo(pos.x, pos.y);
@@ -407,9 +463,35 @@
             canvas.addEventListener('mouseup', end);
             canvas.addEventListener('mouseout', end);
 
-            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); start(e.touches[0]); }, { passive: false });
-            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); move(e.touches[0]); }, { passive: false });
-            canvas.addEventListener('touchend', (e) => { e.preventDefault(); end(); });
+            // 触摸事件：安全区内允许滚动，其他区域绘画
+            canvas.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const pos = getPos(touch);
+
+                // 如果在安全区，允许滚动（不preventDefault）
+                if (isInSafeZone(pos)) {
+                    return;
+                }
+
+                // 否则阻止滚动，开始绘画
+                e.preventDefault();
+                start(touch);
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                // 如果正在绘画，阻止滚动
+                if (isDrawing) {
+                    e.preventDefault();
+                    move(e.touches[0]);
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                if (isDrawing) {
+                    e.preventDefault();
+                }
+                end();
+            }, { passive: false });
         }
 
         function getPos(e) {
