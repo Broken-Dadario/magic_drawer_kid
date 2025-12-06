@@ -185,8 +185,8 @@
         <!-- 左侧栏: 控制区 -->
         <aside class="flex-none w-full lg:w-80 flex flex-col gap-2 sm:gap-3 lg:gap-4 pb-2 sm:pb-4">
 
-            <!-- 单词选择器 -->
-            <div id="word-selector" class="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 transition-opacity duration-300">
+            <!-- 单词选择器 (现在支持动态添加) -->
+            <div id="word-selector" class="grid grid-cols-3 lg:grid-cols-2 gap-2 sm:gap-3 transition-opacity duration-300">
                 <button onclick="setWord('apple', true)" id="btn-apple" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-red-100 text-red-800 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 active transform hover:-rotate-1 transition-all">
                     <span class="text-xl sm:text-2xl">🍎</span> <span class="hidden sm:inline">Apple</span><span class="sm:hidden">🍎</span>
                 </button>
@@ -196,16 +196,26 @@
                 <button onclick="setWord('ocean', true)" id="btn-ocean" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-blue-100 text-blue-800 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 transform hover:-rotate-1 transition-all">
                      <span class="text-xl sm:text-2xl">🌊</span> <span class="hidden sm:inline">Ocean</span><span class="sm:hidden">🌊</span>
                 </button>
+                <!-- 新增：自定义按钮 -->
+                <button onclick="openCustomModal()" id="btn-custom-add" class="sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-slate-100 text-slate-500 font-bold text-base sm:text-lg justify-center gap-2 transform hover:rotate-1 border-dashed border-4 border-slate-300">
+                     <span class="text-xl sm:text-2xl">➕</span> <span class="hidden sm:inline">自定义</span>
+                </button>
             </div>
 
             <!-- 信息与工具卡片 -->
             <div class="sketchy-box p-3 sm:p-5 relative bg-white rotate-[0.5deg] flex-none">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-16 sm:w-24 h-4 sm:h-6 paper-tape z-20"></div>
 
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-1 relative">
+                    <!-- Loading 遮罩用于单词生成时 -->
+                    <div id="word-loading" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center text-center rounded">
+                        <div class="magic-loader w-8 h-8 mb-2"></div>
+                        <p class="text-xs text-violet-500 font-bold">正在制作单词卡...</p>
+                    </div>
+
                     <div class="flex justify-between items-start">
-                        <h2 id="display-word" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 tracking-wide" style="text-shadow: 2px 2px 0px #eee;">Apple</h2>
-                        <button onclick="speakCurrentWord()" class="sketchy-btn w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-violet-50 text-violet-600 shadow-sm transform hover:scale-105 text-sm sm:text-base" title="朗读">🔊</button>
+                        <h2 id="display-word" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800 tracking-wide break-words max-w-[70%]" style="text-shadow: 2px 2px 0px #eee;">Apple</h2>
+                        <button onclick="speakCurrentWord()" class="sketchy-btn w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-violet-50 text-violet-600 shadow-sm transform hover:scale-105 text-sm sm:text-base flex-shrink-0" title="朗读">🔊</button>
                     </div>
                     <p id="display-meaning" class="text-base sm:text-lg lg:text-xl text-slate-500 font-bold font-noto">苹果 (píng guǒ)</p>
                 </div>
@@ -303,6 +313,20 @@
                 </div>
             </div>
 
+            <!-- 7. 新单词输入弹窗 -->
+            <div id="custom-word-modal" class="hidden absolute inset-0 z-50 bg-black/50 flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl sketchy-box">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center">✨ 添加新单词</h3>
+                    <p class="text-sm text-slate-500 mb-2">输入你想学的英语单词：</p>
+                    <input type="text" id="new-word-input" class="w-full border-2 border-dashed border-slate-300 rounded-xl p-3 mb-4 text-xl text-center font-bold text-violet-600 outline-none focus:border-violet-500 bg-slate-50" placeholder="例如: Banana">
+
+                    <div class="flex justify-end gap-2">
+                        <button onclick="closeCustomModal()" class="flex-1 py-3 rounded-xl text-slate-500 hover:bg-slate-100 font-bold">取消</button>
+                        <button onclick="confirmCustomWord()" class="flex-1 py-3 rounded-xl bg-violet-500 text-white font-bold hover:bg-violet-600 shadow-md">确定</button>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -330,7 +354,7 @@
         // --- 初始化 ---
         function init() {
             resizeCanvas();
-            setWord('apple', false); 
+            setWord('apple', false);
 
             window.addEventListener('resize', () => {
                 clearTimeout(window.resizeTimer);
@@ -338,6 +362,93 @@
             });
 
             setupCanvasEvents();
+        }
+
+        // --- 新单词功能 ---
+        function openCustomModal() {
+            document.getElementById('custom-word-modal').classList.remove('hidden');
+            document.getElementById('new-word-input').value = "";
+            document.getElementById('new-word-input').focus();
+        }
+
+        function closeCustomModal() {
+            document.getElementById('custom-word-modal').classList.add('hidden');
+        }
+
+        async function confirmCustomWord() {
+            const input = document.getElementById('new-word-input');
+            const word = input.value.trim();
+            if (!word) return;
+
+            // 简单校验：只允许英文字母
+            if (!/^[a-zA-Z\s-]+$/.test(word)) {
+                alert("请输入纯英文单词哦！");
+                return;
+            }
+
+            closeCustomModal();
+            await generateNewWordCard(word);
+        }
+
+        // 调用 Netlify Function 生成单词卡信息
+        async function generateNewWordCard(word) {
+            // UI 状态
+            document.getElementById('word-loading').classList.remove('hidden');
+
+            // 临时添加一个占位符
+            const newKey = 'custom_' + Date.now();
+
+            try {
+                // 调用 Netlify Function 进行翻译
+                const response = await fetch('/.netlify/functions/translate-word', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word: word })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `翻译失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // 构造新单词数据
+                const colorPalette = ["#ec4899", "#8b5cf6", "#10b981", "#f59e0b"];
+                const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+
+                words[newKey] = {
+                    text: word.charAt(0).toUpperCase() + word.slice(1),
+                    meaning: `${data.translation} (${data.pinyin})`,
+                    speak: `${word}, ${data.translation}`,
+                    color: randomColor,
+                    textCol: `text-[${randomColor}]`
+                };
+
+                // 更新 UI
+                addWordButtonToUI(newKey, words[newKey]);
+                setWord(newKey, true); // 选中并朗读
+
+            } catch (error) {
+                console.error("Word Gen Error:", error);
+                alert("生成单词卡失败，请检查网络。\n" + error.message);
+            } finally {
+                document.getElementById('word-loading').classList.add('hidden');
+            }
+        }
+
+        function addWordButtonToUI(key, data) {
+            const container = document.getElementById('word-selector');
+            const btn = document.createElement('button');
+            // 插入到倒数第二个位置（自定义按钮之前）
+            const customBtn = document.getElementById('btn-custom-add');
+
+            btn.id = `btn-${key}`;
+            btn.className = `sketchy-btn py-2 sm:py-3 px-2 sm:px-4 bg-white text-slate-600 font-bold text-base sm:text-lg justify-start gap-2 sm:gap-3 transform transition-all hover:-rotate-1`;
+            btn.onclick = () => setWord(key, true);
+            btn.innerHTML = `<span class="text-xl sm:text-2xl">✨</span> <span class="hidden sm:inline">${data.text}</span><span class="sm:hidden">✨</span>`;
+
+            container.insertBefore(btn, customBtn);
         }
 
         function resizeCanvas() {
@@ -386,21 +497,53 @@
 
             currentWordKey = key;
             const data = words[key];
-            
-            document.getElementById('display-word').innerText = data.text;
-            document.getElementById('display-word').className = `text-4xl font-bold tracking-wide ${data.textCol}`;
-            document.getElementById('display-meaning').innerText = data.meaning;
-            document.getElementById('trace-letters').innerText = data.text.toLowerCase();
 
-            ['apple', 'tiger', 'ocean'].forEach(k => {
-                 const btn = document.getElementById(`btn-${k}`);
-                 btn.style.transform = ""; 
-                 btn.classList.remove('ring-2', 'ring-slate-400');
+            // 更新显示文字和含义
+            const displayWord = document.getElementById('display-word');
+            displayWord.innerText = data.text;
+
+            // 简单处理颜色
+            if(data.textCol.startsWith('text-')) {
+                displayWord.className = `text-2xl sm:text-3xl lg:text-4xl font-bold tracking-wide ${data.textCol} break-words max-w-[70%]`;
+                displayWord.style.color = "";
+            } else {
+                displayWord.className = `text-2xl sm:text-3xl lg:text-4xl font-bold tracking-wide break-words max-w-[70%]`;
+                displayWord.style.color = data.color;
+            }
+
+            document.getElementById('display-meaning').innerText = data.meaning;
+
+            // --- 动态设置临摹字体大小 ---
+            const traceText = document.getElementById('trace-letters');
+            traceText.innerText = data.text.toLowerCase();
+
+            const len = data.text.length;
+            // 根据长度动态调整字体大小
+            if (len <= 4) {
+                traceText.style.fontSize = "min(18vw, 220px)";
+            } else if (len <= 7) {
+                traceText.style.fontSize = "min(14vw, 160px)";
+            } else if (len <= 10) {
+                traceText.style.fontSize = "min(10vw, 120px)";
+            } else {
+                traceText.style.fontSize = "min(7vw, 90px)";
+            }
+            // ---------------------------------
+
+            // 更新按钮状态 - 支持动态添加的按钮
+            const allBtns = document.getElementById('word-selector').querySelectorAll('button');
+            allBtns.forEach(b => {
+                if(b.id !== 'btn-custom-add') {
+                    b.style.transform = "";
+                    b.classList.remove('ring-2', 'ring-slate-400', 'bg-violet-50');
+                }
             });
-            
+
             const activeBtn = document.getElementById(`btn-${key}`);
-            activeBtn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400');
-            activeBtn.style.transform = "scale(1.05) translateX(5px)";
+            if(activeBtn) {
+                activeBtn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-400', 'bg-violet-50');
+                activeBtn.style.transform = "scale(1.05) translateX(5px)";
+            }
 
             clearCanvas();
 
