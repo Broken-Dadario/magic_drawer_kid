@@ -160,6 +160,48 @@
         .praise-modal {
             animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
+
+        /* 自定义 Slider 样式 */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #8B5CF6;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #8B5CF6;
+            cursor: pointer;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            border: 2px solid white;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #ddd;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen w-full pb-20 sm:pb-32 lg:pb-40">
@@ -295,7 +337,14 @@
             <canvas id="drawing-board" class="relative z-10 block w-full h-full touch-none cursor-pencil"></canvas>
             
             <!-- 4. 结果展示层 (生成图片用，直接覆盖在画布上) -->
-            <img id="magic-result" class="hidden absolute inset-0 w-full h-full object-cover z-20" alt="魔法画作">
+            <img id="magic-result" class="hidden absolute inset-0 w-full h-full object-cover z-20" alt="魔法画作" style="opacity: 0; transition: opacity 0.1s ease;">
+
+            <!-- 对比滑杆 -->
+            <div id="compare-slider-container" class="hidden absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 w-[90%] sm:w-3/4 max-w-md z-30 flex items-center gap-2 sm:gap-3 bg-white/90 p-2 sm:p-3 rounded-full border-2 border-slate-300 shadow-lg backdrop-blur-sm transform transition-all hover:scale-105">
+                <span class="text-[10px] sm:text-xs font-bold text-slate-500 whitespace-nowrap">原稿</span>
+                <input type="range" id="opacity-slider" min="0" max="100" value="100" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                <span class="text-[10px] sm:text-xs font-bold text-violet-600 whitespace-nowrap">AI画</span>
+            </div>
 
             <!-- 5. 加载遮罩 -->
             <div id="loading-overlay" class="hidden absolute inset-0 z-30 bg-white/90 flex flex-col items-center justify-center backdrop-blur-sm">
@@ -350,7 +399,8 @@
         const canvas = document.getElementById('drawing-board');
         const ctx = canvas.getContext('2d');
         const magicImg = document.getElementById('magic-result');
-        
+        const opacitySlider = document.getElementById('opacity-slider');
+
         // --- 初始化 ---
         function init() {
             resizeCanvas();
@@ -362,6 +412,15 @@
             });
 
             setupCanvasEvents();
+            setupSliderEvents();
+        }
+
+        // --- 滑杆事件设置 ---
+        function setupSliderEvents() {
+            opacitySlider.addEventListener('input', (e) => {
+                const opacityVal = e.target.value / 100;
+                magicImg.style.opacity = opacityVal;
+            });
         }
 
         // --- 新单词功能 ---
@@ -753,6 +812,7 @@
 
                         // 2. 显示结果覆盖层
                         magicImg.classList.remove('hidden');
+                        magicImg.style.opacity = '1'; // 初始完全显示AI画作
                         canvas.classList.add('hidden');
                         document.getElementById('trace-layer').classList.add('hidden');
                         document.getElementById('canvas-bg').classList.add('hidden');
@@ -767,7 +827,12 @@
                         document.getElementById('tools-panel').classList.add('opacity-20', 'pointer-events-none'); // 禁用工具栏
                         document.getElementById('praise-text').classList.remove('hidden');
 
-                        // 5. 几秒后隐藏夸奖弹窗(不隐藏结果)
+                        // 5. 显示对比滑杆
+                        const sliderContainer = document.getElementById('compare-slider-container');
+                        sliderContainer.classList.remove('hidden');
+                        opacitySlider.value = 100; // 初始设置为100（完全显示AI画）
+
+                        // 6. 几秒后隐藏夸奖弹窗(不隐藏结果)
                         setTimeout(() => {
                             praiseModal.classList.add('hidden');
                         }, 3000);
@@ -787,27 +852,31 @@
 
         function resetApp() {
             appMode = 'drawing';
-            
+
             // 恢复画布显示
             magicImg.classList.add('hidden');
+            magicImg.style.opacity = '0';
             canvas.classList.remove('hidden');
             document.getElementById('trace-layer').classList.remove('hidden');
             document.getElementById('canvas-bg').classList.remove('hidden');
-            
+
+            // 隐藏对比滑杆
+            document.getElementById('compare-slider-container').classList.add('hidden');
+
             // 清空画布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // 恢复按钮状态
             const btn = document.getElementById('btn-generate-magic');
             btn.disabled = false;
             btn.innerHTML = `✨ 施展魔法`;
             btn.classList.remove('hidden');
-            
+
             document.getElementById('result-buttons').classList.add('hidden');
             document.getElementById('word-selector').classList.remove('pointer-events-none', 'opacity-50');
             document.getElementById('tools-panel').classList.remove('opacity-20', 'pointer-events-none');
             document.getElementById('praise-text').classList.add('hidden');
-            
+
             // 隐藏夸奖弹窗（以防万一还在）
             document.getElementById('praise-modal').classList.add('hidden');
         }
