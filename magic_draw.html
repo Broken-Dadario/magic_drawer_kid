@@ -810,10 +810,11 @@
                         // 1. 隐藏 Loading
                         loadingOverlay.classList.add('hidden');
 
-                        // 2. 显示结果覆盖层
+                        // 2. 显示AI画作覆盖层（canvas保留在下方作为原画）
                         magicImg.classList.remove('hidden');
                         magicImg.style.opacity = '1'; // 初始完全显示AI画作
-                        canvas.classList.add('hidden');
+
+                        // 隐藏临摹文字和背景线条（但保留canvas原画）
                         document.getElementById('trace-layer').classList.add('hidden');
                         document.getElementById('canvas-bg').classList.add('hidden');
 
@@ -853,10 +854,11 @@
         function resetApp() {
             appMode = 'drawing';
 
-            // 恢复画布显示
+            // 隐藏AI画作
             magicImg.classList.add('hidden');
             magicImg.style.opacity = '0';
-            canvas.classList.remove('hidden');
+
+            // 恢复临摹文字和背景线条
             document.getElementById('trace-layer').classList.remove('hidden');
             document.getElementById('canvas-bg').classList.remove('hidden');
 
