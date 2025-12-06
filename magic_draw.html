@@ -208,15 +208,25 @@
 
     <!-- 顶部导航 -->
     <header class="w-full px-3 sm:px-6 py-2 sm:py-3 z-20 flex-none bg-[#fdfbf7] border-b-2 border-dashed border-slate-200">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 sm:gap-3 transform -rotate-1">
-                <div class="text-2xl sm:text-3xl drop-shadow-sm">✏️</div>
-                <div>
-                    <h1 class="text-lg sm:text-2xl font-bold text-slate-800 tracking-wide sm:tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
+        <div class="max-w-7xl mx-auto">
+            <!-- 第一行：标题和状态 -->
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-2 sm:gap-3 transform -rotate-1">
+                    <div class="text-2xl sm:text-3xl drop-shadow-sm">✏️</div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-bold text-slate-800 tracking-wide sm:tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
+                    </div>
+                </div>
+                <div class="text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    今日剩余5次
                 </div>
             </div>
-            <div class="text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                网页版演示
+            <!-- 第二行：打赏提示 -->
+            <div class="flex items-center justify-center gap-2 text-[10px] sm:text-xs text-slate-500">
+                <span>如果你喜欢这个app，可以为更多AI教育app发电！</span>
+                <button onclick="showDonateModal()" class="bg-gradient-to-r from-red-400 to-pink-400 text-white px-2 sm:px-3 py-1 rounded-full font-bold shadow-sm hover:shadow-md transform hover:scale-105 transition-all">
+                    ❤️ 打赏
+                </button>
             </div>
         </div>
     </header>
@@ -376,6 +386,69 @@
                 </div>
             </div>
 
+            <!-- 8. 使用次数限制提示弹窗 -->
+            <div id="limit-modal" class="hidden absolute inset-0 z-50 bg-black/50 flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl sketchy-box">
+                    <div class="text-center mb-4">
+                        <div class="text-5xl mb-3">🎨</div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">今日试用次数已用完</h3>
+                        <p class="text-slate-600 mb-1">您今天已经使用了 <span class="font-bold text-violet-600">5次</span> 免费额度</p>
+                    </div>
+
+                    <div class="bg-violet-50 border-2 border-dashed border-violet-200 rounded-xl p-4 mb-4">
+                        <p class="text-center text-violet-700 font-bold text-lg">🌟 资源有限哦~</p>
+                        <p class="text-center text-violet-600 text-sm mt-2">请联系我本人开放试用权限~</p>
+                    </div>
+
+                    <div class="text-xs text-slate-400 text-center mb-4">
+                        💡 提示：明天0点自动恢复5次免费使用
+                    </div>
+
+                    <!-- 解锁码输入区域 -->
+                    <div class="border-t pt-4">
+                        <p class="text-xs text-slate-500 mb-2 text-center">已获得解锁码？</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="unlock-code-input" class="flex-1 border-2 border-slate-300 rounded-lg px-3 py-2 text-center font-mono text-sm outline-none focus:border-violet-500" placeholder="输入解锁码">
+                            <button onclick="verifyUnlockCode()" class="px-4 py-2 bg-violet-500 text-white rounded-lg font-bold hover:bg-violet-600 text-sm">解锁</button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="closeLimitModal()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200">知道了</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. 打赏弹窗 -->
+            <div id="donate-modal" class="hidden absolute inset-0 z-50 bg-black/50 flex items-center justify-center backdrop-blur-sm p-4">
+                <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl sketchy-box">
+                    <div class="text-center mb-4">
+                        <div class="text-5xl mb-3">❤️</div>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2">感谢支持</h3>
+                        <p class="text-slate-600 text-sm">您的支持是我创作更多AI教育应用的动力！</p>
+                    </div>
+
+                    <!-- 二维码展示区域 -->
+                    <div class="bg-slate-50 rounded-xl p-4 mb-4 text-center">
+                        <p class="text-sm text-slate-500 mb-3">扫码打赏</p>
+                        <!-- 这里放置二维码图片，用户需要替换 -->
+                        <div class="w-48 h-48 mx-auto bg-white border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center">
+                            <div class="text-center text-slate-400 text-xs p-4">
+                                <p class="mb-2">📷</p>
+                                <p>请将您的收款二维码</p>
+                                <p>保存到项目根目录</p>
+                                <p class="mt-1 font-mono text-[10px]">qrcode.png</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-2">支持微信/支付宝</p>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button onclick="closeDonateModal()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200">关闭</button>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -387,13 +460,123 @@
             tiger: { text: "Tiger", meaning: "老虎 (Lǎohǔ)", speak: "Tiger, 老虎", color: "#f97316", textCol: "text-orange-800" },
             ocean: { text: "Ocean", meaning: "海洋 (Hǎiyáng)", speak: "Ocean, 海洋", color: "#3b82f6", textCol: "text-blue-800" }
         };
-        
+
+        // --- 使用限制配置 ---
+        const DAILY_LIMIT = 5; // 每天免费使用次数
+        const UNLOCK_CODE = "MAGIC2025"; // 解锁码（你可以修改）
+
         let currentWordKey = "apple";
         let isDrawing = false;
         let brushColor = "#2d2d2d";
-        let brushSize = 8; 
+        let brushSize = 8;
         let isEraser = false;
         let appMode = 'drawing'; // 'drawing' or 'result'
+
+        // --- 使用次数管理 ---
+        function getToday() {
+            return new Date().toLocaleDateString('zh-CN');
+        }
+
+        function getUsageData() {
+            const data = localStorage.getItem('magicWordUsage');
+            if (!data) return { date: getToday(), count: 0, unlocked: false };
+            return JSON.parse(data);
+        }
+
+        function saveUsageData(data) {
+            localStorage.setItem('magicWordUsage', JSON.stringify(data));
+        }
+
+        function checkUsageLimit() {
+            const data = getUsageData();
+            const today = getToday();
+
+            // 检查是否已解锁
+            if (data.unlocked) return true;
+
+            // 检查日期，如果是新的一天，重置计数
+            if (data.date !== today) {
+                data.date = today;
+                data.count = 0;
+                saveUsageData(data);
+            }
+
+            // 检查是否超过限制
+            return data.count < DAILY_LIMIT;
+        }
+
+        function incrementUsage() {
+            const data = getUsageData();
+            const today = getToday();
+
+            if (data.date !== today) {
+                data.date = today;
+                data.count = 1;
+            } else {
+                data.count += 1;
+            }
+
+            saveUsageData(data);
+        }
+
+        function getRemainingCount() {
+            const data = getUsageData();
+            const today = getToday();
+
+            if (data.unlocked) return '无限';
+            if (data.date !== today) return DAILY_LIMIT;
+            return Math.max(0, DAILY_LIMIT - data.count);
+        }
+
+        function showLimitModal() {
+            document.getElementById('limit-modal').classList.remove('hidden');
+        }
+
+        function closeLimitModal() {
+            document.getElementById('limit-modal').classList.add('hidden');
+        }
+
+        function verifyUnlockCode() {
+            const input = document.getElementById('unlock-code-input');
+            const code = input.value.trim().toUpperCase();
+
+            if (code === UNLOCK_CODE) {
+                const data = getUsageData();
+                data.unlocked = true;
+                saveUsageData(data);
+
+                alert('🎉 解锁成功！您已获得无限使用权限！');
+                closeLimitModal();
+                input.value = '';
+
+                // 更新顶部标签
+                updateStatusBadge();
+            } else {
+                alert('❌ 解锁码错误，请检查后重试');
+                input.value = '';
+            }
+        }
+
+        function updateStatusBadge() {
+            const data = getUsageData();
+            const badgeElement = document.querySelector('header .text-xs.font-bold');
+
+            if (data.unlocked) {
+                badgeElement.textContent = 'VIP无限版';
+                badgeElement.className = 'text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+            } else {
+                const remaining = getRemainingCount();
+                badgeElement.textContent = `今日剩余${remaining}次`;
+            }
+        }
+
+        function showDonateModal() {
+            document.getElementById('donate-modal').classList.remove('hidden');
+        }
+
+        function closeDonateModal() {
+            document.getElementById('donate-modal').classList.add('hidden');
+        }
 
         // --- DOM 元素 ---
         const canvas = document.getElementById('drawing-board');
@@ -413,6 +596,7 @@
 
             setupCanvasEvents();
             setupSliderEvents();
+            updateStatusBadge(); // 更新顶部状态显示
         }
 
         // --- 滑杆事件设置 ---
@@ -736,11 +920,17 @@
 
         // --- 魔法生成 ---
         async function generateMagic() {
+            // 0. 检查使用次数限制
+            if (!checkUsageLimit()) {
+                showLimitModal();
+                return;
+            }
+
             const btn = document.getElementById('btn-generate-magic');
             const loadingOverlay = document.getElementById('loading-overlay');
             const praiseModal = document.getElementById('praise-modal');
             const wordSelector = document.getElementById('word-selector');
-            
+
             // 1. 锁定界面
             btn.disabled = true;
             btn.innerHTML = `🔮 正在施法中...`;
@@ -806,6 +996,10 @@
                      magicImg.onload = () => {
                         // --- 成功流程 ---
                         appMode = 'result';
+
+                        // 增加使用次数并更新显示
+                        incrementUsage();
+                        updateStatusBadge();
 
                         // 1. 隐藏 Loading
                         loadingOverlay.classList.add('hidden');
