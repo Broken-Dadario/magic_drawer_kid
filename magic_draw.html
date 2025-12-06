@@ -217,7 +217,7 @@
                         <h1 class="text-lg sm:text-2xl font-bold text-slate-800 tracking-wide sm:tracking-widest" style="text-shadow: 1px 1px 0px #e2e8f0;">魔法单词本</h1>
                     </div>
                 </div>
-                <div class="text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <div id="status-badge" class="text-[10px] sm:text-xs font-bold bg-yellow-200 text-yellow-800 px-2 sm:px-3 py-1 border-2 border-yellow-800 rounded-full transform rotate-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                     今日剩余5次
                 </div>
             </div>
@@ -551,7 +551,12 @@
 
         function updateStatusBadge() {
             const data = getUsageData();
-            const badgeElement = document.querySelector('header .text-xs.font-bold');
+            const badgeElement = document.getElementById('status-badge');
+
+            if (!badgeElement) {
+                console.warn('Status badge element not found');
+                return;
+            }
 
             if (data.unlocked) {
                 badgeElement.textContent = 'VIP无限版';
